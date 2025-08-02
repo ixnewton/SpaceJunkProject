@@ -1,0 +1,82 @@
+<h2>Orbit Visualization for {{object1.name}} and {{object2.name}}</h2>
+<div id="cesiumContainer" style="width: 100%; height: 600px;"></div>
+
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.98/Build/Cesium/Cesium.js"></script>
+<link href="https://cesium.com/downloads/cesiumjs/releases/1.98/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+
+<script>
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjZWM2ZWM2My03YjYxLTQyOGEtYjI1Mi05MDc5NzQzZDIxNmEiLCJpZCI6MTAxMTg5LCJpYXQiOjE2NTc4MTI5ODB9.s-w9s9e_i229p-dD4FabGg-2dc-gL2i5E-2bJg-ZzZc'; // Replace with your Cesium Ion token if you have one
+
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+        shouldAnimate: true,
+    });
+
+        const object1 = JSON.parse('{{{object1}}}');
+    const object2 = JSON.parse('{{{object2}}}');
+
+    const totalMinutes = 100; // Approx one orbit
+    const stepMinutes = 1;
+    const start = Cesium.JulianDate.now();
+
+    async function getEphemerisData(tle) {
+        const timeStepInSeconds = stepMinutes * 60;
+        const totalSteps = Math.floor((totalMinutes * 60) / timeStepInSeconds);
+        const resource = new Cesium.SampledPositionProperty();
+
+        const requests = [];
+        for (let i = 0; i <= totalSteps; i++) {
+            const time = Cesium.JulianDate.addSeconds(start, i * timeStepInSeconds, new Cesium.JulianDate());
+            const isoTime = Cesium.JulianDate.toIso8601(time);
+
+            requests.push(
+                fetch('http://localhost:8000/orbital-engine/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tle: { line1: tle.tle_line1, line2: tle.tle_line2 },
+                        predict_at_utc: isoTime,
+                    }),
+                }).then(res => res.json())
+            );
+        }
+
+        const results = await Promise.all(requests);
+
+        results.forEach((result, i) => {
+            if (result.position_eci_km) {
+                const time = Cesium.JulianDate.addSeconds(start, i * timeStepInSeconds, new Cesium.JulianDate());
+                const position = new Cesium.Cartesian3(result.position_eci_km.x * 1000, result.position_eci_km.y * 1000, result.position_eci_km.z * 1000);
+                resource.addSample(time, position);
+            }
+        });
+
+        return resource;
+    }
+
+    async function plotOrbit(tle, color) {
+        const positionProperty = await getEphemerisData(tle);
+
+        const satelliteEntity = viewer.entities.add({
+            availability: new Cesium.TimeIntervalCollection([
+                new Cesium.TimeInterval({ start: start, stop: Cesium.JulianDate.addSeconds(start, totalMinutes * 60, new Cesium.JulianDate()) }),
+            ]),
+            position: positionProperty,
+            model: {
+                uri: 'https://assets.cesium.com/models/satellite/satellite.glb',
+                minimumPixelSize: 64,
+            },
+            path: {
+                resolution: 1,
+                material: new Cesium.PolylineGlowMaterialProperty({ glowPower: 0.1, color: color }),
+                trailTime: totalMinutes * 60,
+                leadTime: 0,
+                width: 5,
+            },
+        });
+        viewer.trackedEntity = satelliteEntity;
+    }
+
+    plotOrbit(object1, Cesium.Color.RED);
+    plotOrbit(object2, Cesium.Color.BLUE);
+
+</script>

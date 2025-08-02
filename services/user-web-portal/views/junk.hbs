@@ -1,0 +1,27 @@
+<h2>{{title}}</h2>
+
+<form action="/junk" method="GET" class="form-inline mb-4">
+    <input type="text" name="search" class="form-control mr-sm-2" placeholder="Search by name..." value="{{search}}">
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>NORAD Catalog ID</th>
+            <th>Last Updated (UTC)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each objects}}
+        <tr>
+            <td>{{this.name}}</td>
+            <td>{{this.norad_cat_id}}</td>
+            <td>{{this.last_updated_utc}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+{{#unless objects}}
+<p>No space junk found in the catalog.</p>
+{{/unless}}

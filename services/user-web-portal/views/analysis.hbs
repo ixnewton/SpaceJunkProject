@@ -1,0 +1,40 @@
+<h2>Conjunction Analysis</h2>
+<form action="/analysis" method="POST">
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="object1_id">Select Object 1</label>
+            <select id="object1_id" name="object1_id" class="form-control">
+                {{#each objects}}
+                <option value="{{this.norad_cat_id}}" {{#if (eq this.norad_cat_id ../selected_obj1.norad_cat_id)}}selected{{/if}}>{{this.name}}</option>
+                {{/each}}
+            </select>
+        </div>
+        <div class="form-group col-md-6">
+            <label for="object2_id">Select Object 2</label>
+            <select id="object2_id" name="object2_id" class="form-control">
+                {{#each objects}}
+                <option value="{{this.norad_cat_id}}" {{#if (eq this.norad_cat_id ../selected_obj2.norad_cat_id)}}selected{{/if}}>{{this.name}}</option>
+                {{/each}}
+            </select>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Analyze</button>
+</form>
+
+{{#if result}}
+<div class="card mt-4">
+    <div class="card-header">Analysis Result for <strong>{{selected_obj1.name}}</strong> and <strong>{{selected_obj2.name}}</strong></div>
+    <div class="card-body">
+        <p><strong>Time of Closest Approach (UTC):</strong> {{result.time_of_closest_approach_utc}}</p>
+        <p><strong>Minimum Distance (km):</strong> {{result.minimum_distance_km}}</p>
+        <p><strong>Collision Imminent:</strong> <span class="{{#if result.is_collision_imminent}}text-danger font-weight-bold{{else}}text-success{{/if}}">{{result.is_collision_imminent}}</span></p>
+        <a href="/visualize?obj1={{selected_obj1.norad_cat_id}}&obj2={{selected_obj2.norad_cat_id}}" class="btn btn-info mt-3">Visualize Orbit</a>
+    </div>
+</div>
+{{/if}}
+
+{{#if error}}
+<div class="alert alert-danger mt-4">
+    {{error}}
+</div>
+{{/if}}

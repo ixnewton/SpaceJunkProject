@@ -1,5 +1,8 @@
 fastapi
 uvicorn
+httpx
+numpy
 astropy
 numpy
 scipy
+python-multipart

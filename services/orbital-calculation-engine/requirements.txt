@@ -3,3 +3,4 @@ uvicorn
 astropy
 numpy
 scipy
+sgp4

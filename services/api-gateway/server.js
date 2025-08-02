@@ -12,13 +12,20 @@ const services = [
     },
     {
         route: '/orbital-engine',
-        target: 'http://localhost:8001' // Assuming orbital engine runs on 8001
+        target: 'http://localhost:8005'
     },
     {
         route: '/collision-analyzer',
-        target: 'http://localhost:8002' // Assuming collision analyzer runs on 8002
+        target: 'http://localhost:8002'
+    },
+    {
+        route: '/data-ingestion',
+        target: 'http://localhost:8006'
+    },
+    {
+        route: '/notifications',
+        target: 'http://localhost:8004'
     }
-    // Add other services here
 ];
 
 // Set up the proxy for each service
