@@ -1,0 +1,77 @@
+System Specification: Space Junk Tracker
+
+1. Introduction
+
+This document outlines the system specification for the "Space Junk Tracker" project. The system is designed to source, track, and predict the trajectories of all man-made objects in Earth's orbit. It will provide crucial data for collision avoidance, re-entry prediction, and overall space situational awareness.
+
+2. Features
+
+2.1. Comprehensive Data Sourcing
+   - The system will aggregate data from all available public and private sources, including but not limited to NASA, ESA, Roscosmos, and commercial satellite operators. This includes data on commercial and national satellites, space exploration probes, research missions, and defense program assets.
+
+2.2. Object Tracking
+   - It will compute and maintain a real-time track of all objects, whether active or defunct (space junk). Tracking will be based on their last known orbital parameters, intended orbits, or designated geo-stationary positions.
+
+2.3. Trajectory Prediction
+   - The system will implement advanced orbital mechanics models to predict the future position of any object at any given date and time after its launch. This will allow for long-term forecasting of orbital paths.
+
+2.4. Collision Prediction
+   - A dedicated module will continuously analyze predicted trajectories to identify potential close approaches and high-risk conjunctions between objects. It will calculate collision probabilities and timeframes.
+
+2.5. Atmospheric Re-entry Prediction
+   - The system will model orbital decay to predict when objects are likely to re-enter the Earth's atmosphere and burn up. This feature will identify objects on a terminal trajectory.
+
+2.6. Impact Prediction for Surviving Debris
+   - For objects large enough to potentially survive re-entry, the system will perform detailed analysis to predict the impact footprint. This includes estimating the geographic area (land or ocean) where debris is likely to land.
+
+2.7. Data Verification and Model Refinement
+   - The system will continuously ingest new observational data to verify and refine its predictions. Discrepancies between predicted and actual positions will be used to improve the accuracy of the underlying orbital models.
+
+2.8. Alternative Scenario Forecasting
+   - Based on the latest data, the system will provide alternative end-of-life scenarios for objects, offering updated predictions for potential collisions or re-entry events that deviate from initial forecasts.
+
+3. System Architecture
+
+A modular, microservices-based architecture is proposed to ensure scalability, resilience, and maintainability.
+
+3.1. Core Components:
+   - Data Ingestion Service: A set of connectors responsible for fetching, parsing, and standardizing data from external sources (e.g., TLEs from Celestrak, API data from space agencies).
+   - Orbital Calculation Engine: The core of the system. It uses standardized data to perform orbit propagation, trajectory prediction, and re-entry calculations. This service would be built on proven astrodynamics libraries.
+   - Collision Analysis Service: Consumes trajectory data from the calculation engine to run continuous conjunction analysis, identifying and flagging high-risk events.
+   - Data Storage: A hybrid database system. A time-series database (e.g., InfluxDB, TimescaleDB) for storing orbital position data, and a relational database (e.g., PostgreSQL) for storing object metadata (name, owner, launch date, status, etc.).
+   - API Gateway: A single, secure entry point for all data requests from the user portal. It will provide RESTful endpoints for accessing object data, predictions, and alerts.
+   - Notification Service: Manages and sends alerts to users via the portal, email, or other configured channels.
+
+4. User Portal Design
+
+The user portal will be a web-based application designed for intuitive data exploration and monitoring.
+
+4.1. Key Views and Dashboards:
+   - Main Dashboard: Provides an at-a-glance summary of the orbital environment, including the total number of tracked objects, active vs. debris count, a world map with re-entry predictions, and a list of high-priority collision alerts.
+   - 3D Orbit Visualizer: An interactive 3D globe rendering real-time positions and predicted paths of selected objects. Users can filter objects, zoom, pan, and time-scrub to view past or future positions.
+   - Object Catalog: A searchable and filterable database of all tracked objects. Each object will have a detailed page showing its metadata, current orbital parameters, and historical data.
+   - Collision Alert Center: A dedicated view listing all potential conjunction events. It will be sortable by probability, time-to-collision, and object criticality. Each alert will provide details of the objects involved and visualization of the event.
+   - Re-entry Tracker: A dashboard focused on objects predicted to re-enter the atmosphere. It will display a world map with predicted impact zones for debris that may survive re-entry.
+   - Analytics & Reporting: A section for generating and viewing statistical graphs, such as the growth of space debris over time, distribution of objects by country of origin, and orbital altitude distribution.
+
+5. Margin of Error Analysis
+
+5.1. Core Principles
+   - The system will quantify the uncertainty in its predictions by calculating a margin of error. This is crucial for providing users with a confidence level for any given prediction (collision, re-entry, or simple trajectory).
+   - The margin of error will be dynamic, updated continuously as new observational data becomes available.
+
+5.2. Calculation Methodology
+   - The primary method for calculating the margin of error will be comparing the predicted orbital state (position and velocity) against the most recent real-world observational data (e.g., from radar, optical telescopes).
+   - Statistical models (e.g., Kalman filters) will be employed to process the differences (residuals) between predicted and observed states. The covariance matrix from the filter will provide a statistical measure of the uncertainty in the object's state.
+   - This uncertainty will be projected forward in time to define a "cone of uncertainty" around the predicted trajectory. The size of this cone represents the margin of error.
+
+5.3. Factors Influencing Margin of Error
+   - Time Since Last Observation: The longer the time since the last reliable observation, the larger the margin of error.
+   - Object Characteristics: Smaller, irregularly shaped objects and those with high area-to-mass ratios are more affected by non-gravitational forces (like solar radiation pressure), leading to higher prediction uncertainty.
+   - Orbital Regime: Objects in Low Earth Orbit (LEO) are subject to more atmospheric drag, a highly variable force, which increases the margin of error compared to objects in GEO or deep space.
+   - Data Quality: The accuracy of the input observational data directly impacts the prediction confidence.
+
+5.4. Presentation in User Portal
+   - 3D Visualizer: The margin of error will be visualized as a translucent, expanding "error ellipsoid" or "tube" around the predicted path of an object.
+   - Collision Alerts: Collision probabilities will be calculated based on the overlap of the error ellipsoids of two objects, not just their predicted paths. This provides a more realistic risk assessment.
+   - Re-entry Predictions: Impact zones on the ground will be displayed as a probability heatmap or a contour map, representing the margin of error in the final touchdown location.
