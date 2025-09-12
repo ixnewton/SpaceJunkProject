@@ -9,7 +9,9 @@ router.get('/', async (req, res) => {
         const db = mongo.getDb();
         let query = {};
         if (req.query.search) {
-            query = { name: { $regex: req.query.search, $options: 'i' } };
+            // Sanitize the search query to escape special regex characters
+            const escapedSearch = req.query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            query = { name: { $regex: escapedSearch, $options: 'i' } };
         }
         const objects = await db.collection('space_objects').find(query).sort({ name: 1 }).toArray();
         res.render('junk', { 

@@ -1,6 +1,7 @@
 # Dependencies
-/node_modules/
-/venv/
+node_modules/
+__pycache__/
+venv/
 
 # IDEs and editors
 .idea/
@@ -16,8 +17,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # Build output
-/build/
-/dist/
+build/
+dist/
 
 # Misc
 .DS_Store

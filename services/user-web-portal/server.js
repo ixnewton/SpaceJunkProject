@@ -76,9 +76,13 @@ mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
         app.use('/users', require('./routes/users'));
         app.use('/visualize', require('./routes/visualize'));
 
-        app.listen(PORT, () => console.log(`User Web Portal started on port ${PORT}`));
+        if (require.main === module) {
+            app.listen(PORT, () => console.log(`User Web Portal started on port ${PORT}`));
+        }
     })
     .catch(err => {
         console.error('Failed to connect to MongoDB', err);
         process.exit(1);
     });
+
+module.exports = app;
