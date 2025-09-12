@@ -22,7 +22,11 @@ def read_root():
 @app.post("/predict")
 def predict_position(request: PredictionRequest):
     try:
+        if len(request.tle.line1) != 69 or len(request.tle.line2) != 69:
+            raise ValueError("Invalid TLE format")
         satellite = Satrec.twoline2rv(request.tle.line1, request.tle.line2)
+        if satellite.error != 0:
+            raise ValueError(f"TLE error: {satellite.error_message}")
         predict_time = Time(request.predict_at_utc, format='isot', scale='utc')
         jd, fr = jday(predict_time.datetime.year, predict_time.datetime.month, predict_time.datetime.day, 
                       predict_time.datetime.hour, predict_time.datetime.minute, predict_time.datetime.second)

@@ -4,3 +4,5 @@ astropy
 numpy
 scipy
 sgp4
+pytest
+httpx
